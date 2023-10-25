@@ -38,52 +38,23 @@ playNoise.addEventListener('click', function () {
 
 function moreNoise(){
     audioCtx2 = new AudioContext()
+    const oscillator = audioCtx2.createOscillator();
+    oscillator.type = 'sine';
+    oscillator.frequency.value = 440; // Set the frequency to 440Hz (A4)
 
-    const lowpass1 = audioCtx2.createBiquadFilter()
-    lowpass1.type = 'lowpass'
-    lowpass1.frequency.value = 30; //45
+    // Create a resonant bandpass filter
+    const filter = audioCtx2.createBiquadFilter();
+    filter.type = 'bandpass';
+    filter.frequency.value = 1000; // Set the center frequency to 1000Hz
+    filter.Q.value = 10; // Set the quality factor to 10
 
-    const lowpass2 = audioCtx2.createBiquadFilter()
-    lowpass2.type = 'lowpass'
-    lowpass2.frequency.value = 30; //400
+    // Connect the oscillator to the filter and the filter to the audio context's destination (e.g., your speakers)
+    oscillator.connect(filter);
+    filter.connect(audioCtx2.destination);
 
-    const highpass = audioCtx2.createBiquadFilter()
-    highpass.type = 'highpass'
-    highpass.Q.value = 50;
-    highpass.frequency.value = 76;
+    // Start the oscillator
+    oscillator.start();
 
-    const gain1 = audioCtx2.createGain();
-    gain1.gain.value = 0.44444;
-
-    const gain2 = audioCtx2.createGain();
-    gain2.gain.value = 15; //4
-
-    var bufferSize = 10 * audioCtx2.sampleRate,
-    noiseBuffer = audioCtx2.createBuffer(1, bufferSize, audioCtx2.sampleRate),
-    output = noiseBuffer.getChannelData(0);
-
-    var lastOut = 0;
-    for (var i = 0; i < bufferSize; i++) {
-        var brown = Math.random() * 2 - 1;
-
-        output[i] = (lastOut + (0.02 * brown)) / 1.02;
-        lastOut = output[i];
-        output[i] *= 3.5;
-    }
-
-    brownNoise = audioCtx2.createBufferSource();
-    brownNoise.buffer = noiseBuffer;
-    brownNoise.loop = true;
-
-    brownNoise.connect(lowpass1).connect(highpass)
-    highpass.connect(gain1).connect(audioCtx2.destination);
-
-    brownNoise.connect(lowpass2).connect(gain2)
-    gain2.connect(highpass.frequency)
-
-    // add.connect(highpass.frequency)
-    
-    brownNoise.start(0);
 }
 
 
@@ -98,16 +69,12 @@ function babbling_brook(){
     lowpass2.type = 'lowpass'
     lowpass2.frequency.value = 14; //14
 
-
-    // new ////////
     const lowpass3 = audioCtx1.createBiquadFilter()
     lowpass3.type = 'lowpass'
     lowpass3.frequency.value = 10;
 
     const gain3 = audioCtx1.createGain();
     gain3.gain.value = 1500;
-    //////////////////////
-
 
     const highpass = audioCtx1.createBiquadFilter()
     highpass.type = 'highpass'
